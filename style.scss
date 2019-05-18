@@ -5,8 +5,19 @@
   margin: 0 8px;
   width: 24px;
   opacity: .6;
+
+  &:hover {
+    opacity: .8;
+  }
 }
 
-.multitask-popout-icon:hover {
-  opacity: .8;
+.multitask-popout {
+  .pc-layers .pc-layer:nth-child(1) > .pc-flex > .pc-wrapper, // Guilds
+  .pc-channels, // Channels
+  .pc-membersWrap, // Members
+  .multitask-popout-icon, // Popout icon
+  .powercord-games-bar // Plugin
+  {
+    display: none;
+  }
 }

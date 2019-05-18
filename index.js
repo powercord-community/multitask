@@ -6,8 +6,8 @@ const { inject, uninject } = require('powercord/injector');
 const { React, getModuleByDisplayName, constants: { Routes } } = require('powercord/webpack');
 
 module.exports = class Multitask extends Plugin {
-  startPlugin () {
-    this.loadCSS(resolve(__dirname, 'style.css'));
+  async startPlugin () {
+    this.loadCSS(resolve(__dirname, 'style.scss'));
     this._addPopoutIcon();
   }
 
@@ -20,21 +20,48 @@ module.exports = class Multitask extends Plugin {
     const route = `https:${GLOBAL_ENV.WEBAPP_ENDPOINT}${Routes.CHANNEL(guildId, channelId)}`;
 
     const isMac = process.platform === 'darwin';
-    const opts = { ...BrowserWindow.getFocusedWindow().webContents.browserWindowOptions };
+    const opts = {
+      ...BrowserWindow.getFocusedWindow().webContents.browserWindowOptions,
+      minWidth: 530,
+      minHeight: 320
+    };
     delete opts.show;
     delete opts.x;
     delete opts.y;
+    delete opts.minWidth;
+    delete opts.minHeight;
     const window = new BrowserWindow(opts);
 
     window.webContents.once('did-finish-load', () => {
-      const func = ((__dirname) => powercord.styleManager.loadPluginCSS('popout-chatonly', require('path').resolve(__dirname, 'popout.css'))).toString();
-      window.webContents.executeJavaScript(`(${func})(${JSON.stringify(__dirname)})`);
+      const func = (async () => {
+        // Prevent Discord from connecting to a voice channel
+        (await require('powercord/webpack').getModule([ 'clearVoiceChannel' ])).clearVoiceChannel();
+
+        // Make Discord think you're in dnd to prevent notifications from the popout
+        console.log((await require('powercord/webpack').getModule([ 'makeTextChatNotification' ])));
+        (await require('powercord/webpack').getModule([ 'makeTextChatNotification' ])).makeTextChatNotification =
+          function makeTextChatNotification () {
+            return void 0;
+          };
+
+        // Make the popup closable on MacOS
+        const macCloseBtn = document.querySelector('.pc-macButtonClose');
+        if (macCloseBtn) {
+          macCloseBtn.addEventListener('click', () => {
+            const w = require('electron').remote.getCurrentWindow();
+            w.close();
+            w.destroy();
+          });
+        }
+
+        // Add a CSS class and value in GLOBAL_ENV for external plugins
+        document.body.classList.add('multitask-popout');
+        GLOBAL_ENV.MULTITASK_POPOUT = true;
+      });
+      window.webContents.executeJavaScript(`(${func.toString()})()`);
     });
 
-    if (isMac) {
-      window.on('close', () => window.destroy());
-    }
-
+    window.on('close', () => window.destroy());
     window.loadURL(route);
   }
 
