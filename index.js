@@ -38,15 +38,14 @@ module.exports = class Multitask extends Plugin {
         (await require('powercord/webpack').getModule([ 'clearVoiceChannel' ])).clearVoiceChannel();
 
         // Make Discord think you're in dnd to prevent notifications from the popout
-        console.log((await require('powercord/webpack').getModule([ 'makeTextChatNotification' ])));
         (await require('powercord/webpack').getModule([ 'makeTextChatNotification' ])).makeTextChatNotification =
           function makeTextChatNotification () {
             return void 0;
           };
 
         // Make the popup closable on MacOS
-        const macCloseBtn = document.querySelector('.pc-macButtonClose');
-        if (macCloseBtn) {
+        if (process.platform === 'darwin') {
+          const macCloseBtn = await require('powercord/util').waitFor('.pc-macButtonClose');
           macCloseBtn.addEventListener('click', () => {
             const w = require('electron').remote.getCurrentWindow();
             w.close();
