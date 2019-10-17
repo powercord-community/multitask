@@ -19,7 +19,6 @@ module.exports = class Multitask extends Plugin {
     // eslint-disable-next-line new-cap
     const route = `https:${GLOBAL_ENV.WEBAPP_ENDPOINT}${Routes.CHANNEL(guildId, channelId)}`;
 
-    const isMac = process.platform === 'darwin';
     const opts = {
       ...BrowserWindow.getFocusedWindow().webContents.browserWindowOptions,
       minWidth: 530,
@@ -66,11 +65,11 @@ module.exports = class Multitask extends Plugin {
 
   async _addPopoutIcon () {
     const HeaderBarContainer = await getModuleByDisplayName('HeaderBarContainer');
-    inject('multitask-icon', HeaderBarContainer.prototype, 'renderToolbar', (args, res) => {
-      if (res.props.children[1]) {
-        const guildId = res.props.children[0][0].key === 'calls' ? '@me' : res.props.children[1].key;
-        const channelId = res.props.children[0][1].props.channel.id;
-        res.props.children.unshift(
+    inject('multitask-icon', HeaderBarContainer.prototype, 'renderLoggedIn', (args, res) => {
+      if (res.props.toolbar && res.props.toolbar.props.children) {
+        const guildId = res.props.toolbar.props.children[0][0].key === 'calls' ? '@me' : res.props.toolbar.props.children[1].key;
+        const channelId = res.props.toolbar.props.children[0][1].props.channel.id;
+        res.props.toolbar.props.children.unshift(
           React.createElement(Tooltip, {
             text: 'Popout',
             position: 'bottom'

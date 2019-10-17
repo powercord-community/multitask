@@ -12,16 +12,20 @@
 }
 
 .multitask-popout {
-  .pc-layers .pc-layer:nth-child(1) > .pc-flex > .pc-wrapper, // Guilds
-  .pc-channels, // Channels
-  .pc-membersWrap, // Members
-  .multitask-popout-icon, // Popout icon
-  .powercord-games-bar // Plugin
+  .wrapper-1Rf91z, // Guilds
+  .sidebar-2K8pFh, // Channels
+  .membersWrap-2h-GB4, // Members
+  .multitask-popout-icon, // Icons
+  .powercord-games-bar // Plugins
   {
     display: none;
   }
 
-  .pc-macButtons {
+  .base-3dtUhz {
+    left: 0;
+  }
+
+  div[class*="macButtons"] {
     padding: 3px;
     width: 56px;
   }
