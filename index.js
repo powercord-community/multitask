@@ -66,7 +66,7 @@ module.exports = class Multitask extends Plugin {
   async _addPopoutIcon () {
     const HeaderBarContainer = await getModuleByDisplayName('HeaderBarContainer');
     inject('multitask-icon', HeaderBarContainer.prototype, 'renderLoggedIn', (args, res) => {
-      if (res.props.toolbar && res.props.toolbar.props.children) {
+      if (res.props.toolbar && res.props.toolbar.props.children && res.props.toolbar.props.children[0][0]) {
         const guildId = res.props.toolbar.props.children[0][0].key === 'calls' ? '@me' : res.props.toolbar.props.children[1].key;
         const channelId = res.props.toolbar.props.children[0][1].props.channel.id;
         res.props.toolbar.props.children.unshift(
