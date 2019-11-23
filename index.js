@@ -22,64 +22,32 @@ const { Plugin } = require('powercord/entities');
 const { Tooltip, Icon } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
 const { React, getModule, getModuleByDisplayName, constants: { Routes } } = require('powercord/webpack');
+const { open: openModal } = require('powercord/modal');
+
 const SwitchIcon = require('./components/SwitchIcon');
+const Settings = require('./components/Settings');
+const Modal = require('./components/Modal');
 
 module.exports = class Multitask extends Plugin {
   async startPlugin () {
     this.loadCSS(resolve(__dirname, 'style.scss'));
+    this.registerSettings('multitask', 'Multitask', Settings);
     this._addPopoutIcon();
+    if (!this.settings.get('accounts')) {
+      const tokenModule = await getModule([ 'getToken' ]);
+      const userModule = await getModule([ 'getCurrentUser' ]);
+      const user = userModule.getCurrentUser();
+      this.settings.set('accounts', [
+        {
+          name: user.tag,
+          token: tokenModule.getToken()
+        }
+      ]);
+    }
   }
 
   pluginWillUnload () {
     uninject('multitask-icon');
-  }
-
-  openPopout (guildId, channelId) {
-    // eslint-disable-next-line new-cap
-    const route = `https:${GLOBAL_ENV.WEBAPP_ENDPOINT}${Routes.CHANNEL(guildId, channelId)}`;
-
-    const opts = {
-      ...BrowserWindow.getFocusedWindow().webContents.browserWindowOptions,
-      minWidth: 530,
-      minHeight: 320
-    };
-    delete opts.show;
-    delete opts.x;
-    delete opts.y;
-    delete opts.minWidth;
-    delete opts.minHeight;
-    const window = new BrowserWindow(opts);
-
-    window.webContents.once('did-finish-load', () => {
-      const func = (async () => {
-        // Prevent Discord from connecting to a voice channel
-        (await require('powercord/webpack').getModule([ 'clearVoiceChannel' ])).clearVoiceChannel();
-
-        // Make Discord think you're in dnd to prevent notifications from the popout
-        (await require('powercord/webpack').getModule([ 'makeTextChatNotification' ])).makeTextChatNotification =
-          function makeTextChatNotification () {
-            return void 0;
-          };
-
-        // Make the popup closable on MacOS
-        if (process.platform === 'darwin') {
-          const macCloseBtn = await require('powercord/util').waitFor('.pc-macButtonClose');
-          macCloseBtn.addEventListener('click', () => {
-            const w = require('electron').remote.getCurrentWindow();
-            w.close();
-            w.destroy();
-          });
-        }
-
-        // Add a CSS class and value in GLOBAL_ENV for external plugins
-        document.body.classList.add('multitask-popout');
-        GLOBAL_ENV.MULTITASK_POPOUT = true;
-      });
-      window.webContents.executeJavaScript(`(${func.toString()})()`);
-    });
-
-    window.on('close', () => window.destroy());
-    window.loadURL(route);
   }
 
   async _addPopoutIcon () {
@@ -103,10 +71,6 @@ module.exports = class Multitask extends Plugin {
         );
       }
 
-      return res;
-      // whats this
-      /* eslint-disable */
-      // noinspection UnreachableCodeJS
       const Switcher = React.createElement(Tooltip, {
         text: 'Switch account',
         position: 'bottom'
@@ -114,7 +78,11 @@ module.exports = class Multitask extends Plugin {
         className: [ classes.iconWrapper, classes.clickable ].join(' ')
       }, React.createElement(SwitchIcon, {
         className: classes.icon,
-        onClick: () => console.log('test')
+        onClick: () =>
+          openModal(() => React.createElement(Modal, {
+            accounts: this.settings.get('accounts'),
+            open: this._openNewAccount.bind(this)
+          }))
       })));
 
       if (!res.props.toolbar) {
@@ -124,5 +92,73 @@ module.exports = class Multitask extends Plugin {
       }
       return res;
     });
+  }
+
+  _openNewAccount (token) {
+    const currentOpts = BrowserWindow.getFocusedWindow().webContents.browserWindowOptions;
+    const opts = {
+      ...currentOpts,
+      token,
+      minWidth: 530,
+      minHeight: 320,
+      powercordPreload: currentOpts.webPreferences.preload,
+      webPreferences: {
+        ...currentOpts.webPreferences,
+        preload: resolve(__dirname, 'preload.js')
+      }
+    };
+    delete opts.show;
+    delete opts.x;
+    delete opts.y;
+    delete opts.minWidth;
+    delete opts.minHeight;
+    const window = new BrowserWindow(opts);
+    window.on('close', () => window.destroy());
+    window.loadURL(location.href);
+  }
+
+  _openPopout (guildId, channelId) {
+    // eslint-disable-next-line new-cap
+    const route = `https:${GLOBAL_ENV.WEBAPP_ENDPOINT}${Routes.CHANNEL(guildId, channelId)}`;
+    const func = (async () => {
+      // Prevent Discord from connecting to a voice channel
+      (await require('powercord/webpack').getModule([ 'clearVoiceChannel' ])).clearVoiceChannel();
+
+      // Make Discord think you're in dnd to prevent notifications from the popout
+      (await require('powercord/webpack').getModule([ 'makeTextChatNotification' ])).makeTextChatNotification =
+        function makeTextChatNotification () {
+          return void 0;
+        };
+
+      // Make the popup closable on MacOS
+      if (process.platform === 'darwin') {
+        const macCloseBtn = await require('powercord/util').waitFor('.macButtonClose-MwZ2nf');
+        macCloseBtn.addEventListener('click', () => {
+          const w = require('electron').remote.getCurrentWindow();
+          w.close();
+          w.destroy();
+        });
+      }
+
+      // Add a CSS class and value in GLOBAL_ENV for external plugins
+      document.body.classList.add('multitask-popout');
+      GLOBAL_ENV.MULTITASK_POPOUT = true;
+    });
+
+    const opts = {
+      ...BrowserWindow.getFocusedWindow().webContents.browserWindowOptions,
+      minWidth: 530,
+      minHeight: 320
+    };
+    delete opts.show;
+    delete opts.x;
+    delete opts.y;
+    delete opts.minWidth;
+    delete opts.minHeight;
+    const window = new BrowserWindow(opts);
+
+    window.webContents.once('did-finish-load', () => window.webContents.executeJavaScript(`(${func.toString()})()`));
+    window.on('close', () => window.destroy());
+    window.loadURL(route);
   }
 };
