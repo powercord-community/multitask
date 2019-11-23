@@ -26,9 +26,14 @@ const FormTitle = AsyncComponent.from(getModuleByDisplayName('FormTitle'));
 module.exports = ({ accounts, open }) => <Confirm
   red={false}
   header='Switch accounts'
-  confirmText={null}
+  confirmText='Open Settings'
   cancelText='Cancel'
   onCancel={closeModal}
+  onConfirm={async () => {
+    const settingsModule = await getModule([ 'open', 'saveAccountChanges' ]);
+    settingsModule.open('multitask');
+    closeModal();
+  }}
 >
   <div className='powercord-text'>
     {accounts.map(acc => <>
