@@ -95,6 +95,18 @@ module.exports = class Multitask extends Plugin {
   }
 
   _openNewAccount (token) {
+    const func = (async () => {
+      // Make the popup closable on MacOS
+      if (process.platform === 'darwin') {
+        const macCloseBtn = await require('powercord/util').waitFor('.macButtonClose-MwZ2nf');
+        macCloseBtn.addEventListener('click', () => {
+          const w = require('electron').remote.getCurrentWindow();
+          w.close();
+          w.destroy();
+        });
+      }
+    });
+
     const currentOpts = BrowserWindow.getFocusedWindow().webContents.browserWindowOptions;
     const opts = {
       ...currentOpts,
@@ -114,6 +126,7 @@ module.exports = class Multitask extends Plugin {
     delete opts.minHeight;
     const window = new BrowserWindow(opts);
     window.on('close', () => window.destroy());
+    window.webContents.once('did-finish-load', () => window.webContents.executeJavaScript(`(${func.toString()})()`));
     window.loadURL(location.href);
   }
 
