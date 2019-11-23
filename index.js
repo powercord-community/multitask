@@ -62,11 +62,11 @@ module.exports = class Multitask extends Plugin {
             text: 'Popout',
             position: 'bottom'
           }, React.createElement('div', {
-            className: [ classes.iconWrapper, classes.clickable ].join(' ')
+            className: [ 'multitask-icon', classes.iconWrapper, classes.clickable ].join(' ')
           }, React.createElement(Icon, {
             name: 'ExternalLink',
-            className: classes.icon,
-            onClick: () => this.openPopout(guildId, channelId)
+            className: [ 'multitask-icon', classes.icon ].join(' '),
+            onClick: () => this._openPopout(guildId, channelId)
           })))
         );
       }
@@ -75,9 +75,9 @@ module.exports = class Multitask extends Plugin {
         text: 'Switch account',
         position: 'bottom'
       }, React.createElement('div', {
-        className: [ classes.iconWrapper, classes.clickable ].join(' ')
+        className: [ 'multitask-icon', classes.iconWrapper, classes.clickable ].join(' ')
       }, React.createElement(SwitchIcon, {
-        className: classes.icon,
+        className: [ 'multitask-icon', classes.icon ].join(' '),
         onClick: () =>
           openModal(() => React.createElement(Modal, {
             accounts: this.settings.get('accounts'),
