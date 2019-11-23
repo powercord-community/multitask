@@ -71,25 +71,28 @@ module.exports = class Multitask extends Plugin {
         );
       }
 
-      const Switcher = React.createElement(Tooltip, {
-        text: 'Switch account',
-        position: 'bottom'
-      }, React.createElement('div', {
-        className: [ 'multitask-icon', classes.iconWrapper, classes.clickable ].join(' ')
-      }, React.createElement(SwitchIcon, {
-        className: [ 'multitask-icon', classes.icon ].join(' '),
-        onClick: () =>
-          openModal(() => React.createElement(Modal, {
-            accounts: this.settings.get('accounts'),
-            open: this._openNewAccount.bind(this)
-          }))
-      })));
+      if (this.settings.get('accounts').length > 1) {
+        const Switcher = React.createElement(Tooltip, {
+          text: 'Switch account',
+          position: 'bottom'
+        }, React.createElement('div', {
+          className: [ 'multitask-icon', classes.iconWrapper, classes.clickable ].join(' ')
+        }, React.createElement(SwitchIcon, {
+          className: [ 'multitask-icon', classes.icon ].join(' '),
+          onClick: () =>
+            openModal(() => React.createElement(Modal, {
+              accounts: this.settings.get('accounts'),
+              open: this._openNewAccount.bind(this)
+            }))
+        })));
 
-      if (!res.props.toolbar) {
-        res.props.toolbar = Switcher;
-      } else {
-        res.props.toolbar.props.children.push(Switcher);
+        if (!res.props.toolbar) {
+          res.props.toolbar = Switcher;
+        } else {
+          res.props.toolbar.props.children.push(Switcher);
+        }
       }
+
       return res;
     });
   }
