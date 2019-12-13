@@ -23,6 +23,7 @@ const { Tooltip, Icon } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
 const { React, getModule, getModuleByDisplayName, constants: { Routes } } = require('powercord/webpack');
 const { open: openModal } = require('powercord/modal');
+const { sleep } = require('powercord/util');
 
 const SwitchIcon = require('./components/SwitchIcon');
 const Settings = require('./components/Settings');
@@ -36,7 +37,10 @@ module.exports = class Multitask extends Plugin {
     if (!this.settings.get('accounts')) {
       const tokenModule = await getModule([ 'getToken' ]);
       const userModule = await getModule([ 'getCurrentUser' ]);
-      const user = userModule.getCurrentUser();
+      let user;
+      while (!(user = userModule.getCurrentUser())) {
+        await sleep(10);
+      }
       this.settings.set('accounts', [
         {
           name: user.tag,
