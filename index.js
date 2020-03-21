@@ -19,7 +19,7 @@
 const { resolve } = require('path');
 const { remote: { BrowserWindow } } = require('electron');
 const { Plugin } = require('powercord/entities');
-const { Tooltip, Icon } = require('powercord/components');
+const { Tooltip, Icons: { ExternalLink } } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
 const { React, getModule, getModuleByDisplayName, constants: { Routes } } = require('powercord/webpack');
 const { open: openModal } = require('powercord/modal');
@@ -67,8 +67,7 @@ module.exports = class Multitask extends Plugin {
             position: 'bottom'
           }, React.createElement('div', {
             className: [ 'multitask-icon', classes.iconWrapper, classes.clickable ].join(' ')
-          }, React.createElement(Icon, {
-            name: 'ExternalLink',
+          }, React.createElement(ExternalLink, {
             className: [ 'multitask-icon', classes.icon ].join(' '),
             onClick: () => this._openPopout(guildId, channelId)
           })))
