@@ -14,6 +14,14 @@
       input {
         height: 32px;
       }
+
+      .buttons {
+        display: flex;
+
+        button + button {
+          margin-left: 15px;
+        }
+      }
     }
   }
 }

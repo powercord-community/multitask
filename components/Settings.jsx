@@ -3,7 +3,7 @@
  * Licensed under the Open Software License version 3.0
  */
 
-const { React, getModuleByDisplayName } = require('powercord/webpack');
+const { React, getModule, getModuleByDisplayName } = require('powercord/webpack');
 const { Card, Button, AsyncComponent } = require('powercord/components');
 const { TextInput } = require('powercord/components/settings');
 
@@ -75,7 +75,10 @@ module.exports = class Settings extends React.Component {
         >
           Token
         </TextInput>
-        <Button onClick={() => this.addUser()}>Add Account</Button>
+        <div className='buttons'>
+          <Button onClick={() => this.addUser()}>Add Account</Button>
+          <Button onClick={() => this.helpLazyUser()}>Add current account</Button>
+        </div>
       </Card>
 
     </div>;
@@ -97,6 +100,15 @@ module.exports = class Settings extends React.Component {
       token: ''
     });
     this.props.updateSetting('accounts', users);
+  }
+
+  async helpLazyUser () {
+    const tokenModule = await getModule([ 'getToken' ]);
+    const userModule = await getModule([ 'getCurrentUser' ]);
+    this.props.updateSetting('accounts', this.props.getSetting('accounts').concat({
+      name: userModule.getCurrentUser().tag,
+      token: tokenModule.getToken()
+    }));
   }
 
   removeUser (user) {
