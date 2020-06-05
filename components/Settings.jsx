@@ -48,7 +48,7 @@ const Game = AsyncComponent.from((async () => {
   };
 })());
 
-module.exports = class Settings extends React.Component {
+module.exports = class Settings extends React.PureComponent {
   constructor (props) {
     super(props);
 
@@ -59,37 +59,40 @@ module.exports = class Settings extends React.Component {
   }
 
   render () {
-    return <div>
-      {this.renderUserList()}
-      <FormTitle className='multitask-settings-add' tag='h2'>New account</FormTitle>
-      <Card className='multitask-settings-add-card'>
-        <TextInput
-          value={this.state.name}
-          onChange={name => this.setState({ name })}
-        >
+    return (
+      <div>
+        {this.renderUserList()}
+        <FormTitle className='multitask-settings-add' tag='h2'>New account</FormTitle>
+        <Card className='multitask-settings-add-card'>
+          <TextInput
+            value={this.state.name}
+            onChange={name => this.setState({ name })}
+          >
           Account Name
-        </TextInput>
-        <TextInput
-          value={this.state.token}
-          onChange={token => this.setState({ token })}
-        >
+          </TextInput>
+          <TextInput
+            value={this.state.token}
+            onChange={token => this.setState({ token })}
+          >
           Token
-        </TextInput>
-        <div className='buttons'>
-          <Button onClick={() => this.addUser()}>Add Account</Button>
-          <Button onClick={() => this.helpLazyUser()}>Add current account</Button>
-        </div>
-      </Card>
-
-    </div>;
+          </TextInput>
+          <div className='buttons'>
+            <Button onClick={() => this.addUser()}>Add Account</Button>
+            <Button onClick={() => this.helpLazyUser()}>Add current account</Button>
+          </div>
+        </Card>
+      </div>
+    );
   }
 
   renderUserList () {
-    return this.props.getSetting('accounts').map((account, i) => <Game
-      _parent={this}
-      account={account}
-      game={{ name: account.name || `Account #${i}` }}
-    />);
+    return this.props.getSetting('accounts').map((account, i) => (
+      <Game
+        _parent={this}
+        account={account}
+        game={{ name: account.name || `Account #${i}` }}
+      />
+    ));
   }
 
   addUser () {

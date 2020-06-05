@@ -3,7 +3,7 @@
  * Licensed under the Open Software License version 3.0
  */
 
-const { resolve } = require('path');
+const { join } = require('path');
 const { remote: { BrowserWindow } } = require('electron');
 const { Plugin } = require('powercord/entities');
 const { Tooltip, Icons: { ExternalLink } } = require('powercord/components');
@@ -18,8 +18,19 @@ const Modal = require('./components/Modal');
 
 module.exports = class Multitask extends Plugin {
   async startPlugin () {
-    this.loadCSS(resolve(__dirname, 'style.scss'));
-    this.registerSettings('multitask', 'Multitask', Settings);
+    if (window.GlasscordApi) { // @todo: Glasscord compatibility
+      this.error('Glasscord detected. Multitask is not compatible with Glasscord yet.');
+      this.error('Aborting startup.');
+      return;
+    }
+
+    this.loadStylesheet('style.scss');
+    powercord.api.settings.registerSettings('multitask', {
+      category: this.entityID,
+      label: 'Multitask',
+      render: Settings
+    });
+
     this._addPopoutIcon();
     if (!this.settings.get('accounts')) {
       const tokenModule = await getModule([ 'getToken' ]);
@@ -38,6 +49,7 @@ module.exports = class Multitask extends Plugin {
   }
 
   pluginWillUnload () {
+    powercord.api.settings.unregisterSettings('multitask');
     uninject('multitask-icon');
   }
 
@@ -100,7 +112,8 @@ module.exports = class Multitask extends Plugin {
       }
     });
 
-    const currentOpts = BrowserWindow.getFocusedWindow().webContents.browserWindowOptions;
+    const { webContents } = BrowserWindow.getFocusedWindow();
+    const currentOpts = webContents.browserWindowOptions;
     const opts = {
       ...currentOpts,
       token,
@@ -109,7 +122,7 @@ module.exports = class Multitask extends Plugin {
       powercordPreload: currentOpts.webPreferences.preload,
       webPreferences: {
         ...currentOpts.webPreferences,
-        preload: resolve(__dirname, 'preload.js')
+        preload: join(__dirname, 'preload.js')
       }
     };
     delete opts.show;
@@ -118,6 +131,13 @@ module.exports = class Multitask extends Plugin {
     delete opts.minWidth;
     delete opts.minHeight;
     const window = new BrowserWindow(opts);
+    /*
+     * if (GlasscordApi) {
+     *  Glasscord compatibility
+     *   window.webContents._preload = webContents._preload;
+     * }
+     */
+
     window.on('close', () => window.destroy());
     window.webContents.once('did-finish-load', () => window.webContents.executeJavaScript(`(${func.toString()})()`));
     window.loadURL(location.href);
@@ -127,6 +147,11 @@ module.exports = class Multitask extends Plugin {
     // eslint-disable-next-line new-cap
     const route = `https:${GLOBAL_ENV.WEBAPP_ENDPOINT}${Routes.CHANNEL(guildId, channelId)}`;
     const func = (async () => {
+      // Await for Webpack load
+      while (!require('powercord/webpack').instance) {
+        await require('powercord/util').sleep(1);
+      }
+
       // Prevent Discord from connecting to a voice channel
       (await require('powercord/webpack').getModule([ 'clearVoiceChannel' ])).clearVoiceChannel();
 
@@ -151,8 +176,9 @@ module.exports = class Multitask extends Plugin {
       GLOBAL_ENV.MULTITASK_POPOUT = true;
     });
 
+    const { webContents } = BrowserWindow.getFocusedWindow();
     const opts = {
-      ...BrowserWindow.getFocusedWindow().webContents.browserWindowOptions,
+      ...webContents.browserWindowOptions,
       minWidth: 530,
       minHeight: 320
     };
@@ -162,6 +188,12 @@ module.exports = class Multitask extends Plugin {
     delete opts.minWidth;
     delete opts.minHeight;
     const window = new BrowserWindow(opts);
+    /*
+     * if (GlasscordApi) {
+     *  Glasscord compatibility
+     *   window.webContents._preload = webContents._preload;
+     * }
+     */
 
     window.webContents.once('did-finish-load', () => window.webContents.executeJavaScript(`(${func.toString()})()`));
     window.on('close', () => window.destroy());
