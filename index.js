@@ -57,7 +57,7 @@ module.exports = class Multitask extends Plugin {
     const classes = await getModule([ 'iconWrapper', 'clickable' ]);
     const HeaderBarContainer = await getModuleByDisplayName('HeaderBarContainer');
     inject('multitask-icon', HeaderBarContainer.prototype, 'renderLoggedIn', (args, res) => {
-      if (res.props.toolbar && res.props.toolbar.props.children && res.props.toolbar.props.children[0][0]) {
+      /* if (res.props.toolbar && res.props.toolbar.props.children && res.props.toolbar.props.children[0][0]) {
         const guildId = res.props.toolbar.props.children[0][0].key === 'calls' ? '@me' : res.props.toolbar.props.children[1].key;
         const channelId = res.props.toolbar.props.children[0][1].props.channel.id;
         res.props.toolbar.props.children.unshift(
@@ -70,8 +70,8 @@ module.exports = class Multitask extends Plugin {
             className: [ 'multitask-icon', classes.icon ].join(' '),
             onClick: () => this._openPopout(guildId, channelId)
           })))
-        );
-      }
+        ); 
+      } */
 
       if (this.settings.get('accounts').length > 1) {
         const Switcher = React.createElement(Tooltip, {
