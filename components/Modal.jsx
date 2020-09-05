@@ -28,7 +28,7 @@ module.exports = React.memo(
         {accounts.map(acc => <>
           <FormTitle tag='h3'>{acc.name}</FormTitle>
           <div className='multitask-buttons'>
-            <Button
+            {/* <Button
               size={Button.Sizes.SMALL}
               color={Button.Colors.TRANSPARENT}
               onClick={() => {
@@ -37,7 +37,7 @@ module.exports = React.memo(
               }}
             >
               Open New Window
-            </Button>
+            </Button> */}
             <Button
               size={Button.Sizes.SMALL}
               color={Button.Colors.TRANSPARENT}
