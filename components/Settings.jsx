@@ -73,6 +73,7 @@ module.exports = class Settings extends React.PureComponent {
           <TextInput
             value={this.state.token}
             onChange={token => this.setState({ token })}
+            note='If you use a bot token, things will break!'
           >
           Token
           </TextInput>
