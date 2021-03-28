@@ -1,12 +1,11 @@
 /*
- * Copyright (c) 2020 Bowser65
+ * Copyright (c) 2020-2021 Cynthia K. Rey
  * Licensed under the Open Software License version 3.0
  */
 
 const { join } = require('path');
-const { remote: { BrowserWindow } } = require('electron');
 const { Plugin } = require('powercord/entities');
-const { Tooltip, Icons: { ExternalLink } } = require('powercord/components');
+const { Tooltip } = require('powercord/components');
 const { inject, uninject } = require('powercord/injector');
 const { React, getModule, getModuleByDisplayName, constants: { Routes } } = require('powercord/webpack');
 const { open: openModal } = require('powercord/modal');
@@ -70,7 +69,7 @@ module.exports = class Multitask extends Plugin {
             className: [ 'multitask-icon', classes.icon ].join(' '),
             onClick: () => this._openPopout(guildId, channelId)
           })))
-        ); 
+        );
       } */
 
       if (this.settings.get('accounts').length > 1) {

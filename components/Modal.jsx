@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020 Bowser65
+ * Copyright (c) 2020-2021 Cynthia K. Rey
  * Licensed under the Open Software License version 3.0
  */
 
@@ -42,9 +42,8 @@ module.exports = React.memo(
               size={Button.Sizes.SMALL}
               color={Button.Colors.TRANSPARENT}
               onClick={async () => {
-                const tokenModule = await getModule([ 'setToken' ]);
-                tokenModule.setToken(acc.token);
-                location.reload();
+                const tokenModule = await getModule([ 'loginToken' ]);
+                tokenModule.loginToken(acc.token);
               }}
             >
               Use in Current Window
