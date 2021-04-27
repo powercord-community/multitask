@@ -17,12 +17,6 @@ const Modal = require('./components/Modal');
 
 module.exports = class Multitask extends Plugin {
   async startPlugin () {
-    if (window.GlasscordApi) { // @todo: Glasscord compatibility
-      this.error('Glasscord detected. Multitask is not compatible with Glasscord yet.');
-      this.error('Aborting startup.');
-      return;
-    }
-
     this.loadStylesheet('style.scss');
     powercord.api.settings.registerSettings('multitask', {
       category: this.entityID,
@@ -130,12 +124,6 @@ module.exports = class Multitask extends Plugin {
     delete opts.minWidth;
     delete opts.minHeight;
     const window = new BrowserWindow(opts);
-    /*
-     * if (GlasscordApi) {
-     *  Glasscord compatibility
-     *   window.webContents._preload = webContents._preload;
-     * }
-     */
 
     window.on('close', () => window.destroy());
     window.webContents.once('did-finish-load', () => window.webContents.executeJavaScript(`(${func.toString()})()`));
@@ -187,12 +175,6 @@ module.exports = class Multitask extends Plugin {
     delete opts.minWidth;
     delete opts.minHeight;
     const window = new BrowserWindow(opts);
-    /*
-     * if (GlasscordApi) {
-     *  Glasscord compatibility
-     *   window.webContents._preload = webContents._preload;
-     * }
-     */
 
     window.webContents.once('did-finish-load', () => window.webContents.executeJavaScript(`(${func.toString()})()`));
     window.on('close', () => window.destroy());

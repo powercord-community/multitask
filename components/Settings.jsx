@@ -4,7 +4,7 @@
  */
 
 const { React, getModule, getModuleByDisplayName } = require('powercord/webpack');
-const { Card, Button, AsyncComponent } = require('powercord/components');
+const { Card, Button, AsyncComponent, ErrorState } = require('powercord/components');
 const { TextInput } = require('powercord/components/settings');
 
 const FormTitle = AsyncComponent.from(getModuleByDisplayName('FormTitle'));
@@ -54,7 +54,8 @@ module.exports = class Settings extends React.PureComponent {
 
     this.state = {
       name: null,
-      token: null
+      token: null,
+      smh: false
     };
   }
 
@@ -64,15 +65,18 @@ module.exports = class Settings extends React.PureComponent {
         {this.renderUserList()}
         <FormTitle className='multitask-settings-add' tag='h2'>New account</FormTitle>
         <Card className='multitask-settings-add-card'>
+          {this.state.smh && (
+            <ErrorState>You can't use a bot account with the Discord client.</ErrorState>
+          )}
           <TextInput
             value={this.state.name}
-            onChange={name => this.setState({ name })}
+            onChange={name => this.setState({ name, smh: false })}
           >
           Account Name
           </TextInput>
           <TextInput
             value={this.state.token}
-            onChange={token => this.setState({ token })}
+            onChange={token => this.setState({ token, smh: false })}
           >
           Token
           </TextInput>
@@ -95,7 +99,17 @@ module.exports = class Settings extends React.PureComponent {
     ));
   }
 
-  addUser () {
+  async addUser () {
+    if (!this.state.token.startsWith('mfa.')) {
+      const id = atob(this.state.token.split('.')[0])
+      const { getUser } = await getModule([ 'getUser' ])
+      const user = await getUser(id).catch(() => null)
+      if (!user || user.bot) {
+        this.setState({ smh: true })
+        return
+      }
+    }
+
     const users = this.props.getSetting('accounts');
     users.push(this.state);
     this.setState({
