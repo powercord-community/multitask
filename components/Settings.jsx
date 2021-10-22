@@ -121,7 +121,7 @@ module.exports = class Settings extends React.PureComponent {
 
   async helpLazyUser () {
     const tokenModule = await getModule([ 'getToken' ]);
-    const userModule = await getModule([ 'getCurrentUser' ]);
+    const userModule = await getModule([ 'getCurrentUser', 'getUser' ]);
     this.props.updateSetting('accounts', this.props.getSetting('accounts').concat({
       name: userModule.getCurrentUser().tag,
       token: tokenModule.getToken()

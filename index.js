@@ -27,7 +27,7 @@ module.exports = class Multitask extends Plugin {
     this._addPopoutIcon();
     if (!this.settings.get('accounts')) {
       const tokenModule = await getModule([ 'getToken' ]);
-      const userModule = await getModule([ 'getCurrentUser' ]);
+      const userModule = await getModule([ 'getCurrentUser', 'getUser' ]);
       let user;
       while (!(user = userModule.getCurrentUser())) {
         await sleep(10);
